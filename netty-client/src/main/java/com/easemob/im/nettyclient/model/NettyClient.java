@@ -1,17 +1,11 @@
 package com.easemob.im.nettyclient.model;
 
-import io.netty.channel.nio.NioEventLoopGroup;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.tcp.TcpClient;
-
-import java.net.InetSocketAddress;
-import java.net.URI;
 
 /**
  * @author yongkang.zhang@easemob.com
@@ -38,9 +32,6 @@ public class NettyClient implements Client {
                 .metrics(true)
                 .handle((inbound, outbound) -> {
                     inbound.withConnection(connection -> {
-                        if (log.isDebugEnabled()) {
-                            log.debug("msync client connected | address={}", connection.address());
-                        }
                         connection.addHandler(new MSyncDecoder(codec));
                     });
                     DirectProcessor<Void> completion = DirectProcessor.create();

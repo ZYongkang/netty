@@ -11,8 +11,6 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.tcp.TcpClient;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
@@ -36,8 +34,8 @@ public class ResourceConfiguration {
     
         List<Client> list = new ArrayList<>();
         URI remote = properties.getRemote();
-        for (int i = 0; i < properties.getLocals().size(); i++) {
-            String local = properties.getLocals().get(i);
+        for (int i = 0; i < properties.getLocals().length; i++) {
+            String local = properties.getLocals()[i];
             ConnectionProvider provider = ConnectionProvider.elastic(local);
             NioEventLoopGroup eventExecutors = new NioEventLoopGroup(4);
             Scheduler scheduler = Schedulers.newParallel(local);

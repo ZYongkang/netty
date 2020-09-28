@@ -1,16 +1,9 @@
 package com.easemob.im.nettyclient.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.netty.buffer.ByteBuf;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
-import java.time.Duration;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -36,13 +29,18 @@ public class User {
     }
     
     void handleConnection(NettyConnection connection) {
-        log.info("user  connected | name:{}", name);
         this.connection = connection;
         receive();
     }
     
-    public Mono<Long> send() throws JsonProcessingException {
-        return this.connection.send(content).doOnSuccess(ignore -> sendCounter.increment()).thenReturn(1L);
+    public Mono<Long> send() {
+        return this.connection
+                .send(content)
+                .doOnSuccess(ignore -> {
+                    log.info("send message success| [{}]", content);
+                    sendCounter.increment();
+                })
+                .thenReturn(1L);
     }
     
     public void receive() {

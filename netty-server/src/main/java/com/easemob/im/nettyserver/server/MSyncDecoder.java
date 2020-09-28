@@ -11,14 +11,14 @@ import java.util.List;
  */
 public class MSyncDecoder extends ByteToMessageDecoder {
     
-    private MessageCodec codec;
+    private final MessageCodec codec;
     
     public MSyncDecoder(MessageCodec codec) {
         this.codec = codec;
     }
     
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
         List<Message> mSyncList = this.codec.decode(byteBuf);
         list.addAll(mSyncList);
     }

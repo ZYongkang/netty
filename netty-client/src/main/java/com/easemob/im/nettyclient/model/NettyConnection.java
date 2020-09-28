@@ -1,12 +1,9 @@
 package com.easemob.im.nettyclient.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyInbound;
 import reactor.netty.NettyOutbound;
@@ -44,7 +41,7 @@ public class NettyConnection {
         return outbound;
     }
     
-    public Mono<Void> send(Message content) throws JsonProcessingException {
+    public Mono<Void> send(Message content) {
         ByteBuf outputBuf = this.outbound.alloc().buffer();
         codec.encode(content, outputBuf);
         return this.outbound.send(Mono.just(outputBuf)).then();

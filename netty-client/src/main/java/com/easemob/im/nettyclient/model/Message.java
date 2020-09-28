@@ -18,5 +18,4 @@ public class Message {
     public Message(@JsonProperty("content") String content) {
         this.content = content;
     }
-    
 }
