@@ -1,6 +1,5 @@
 package com.easemob.im.nettyserver.server;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.DirectProcessor;
@@ -52,7 +51,6 @@ public class NettyServer {
                     sendCounter.increment();
                 })
                 .handle((inbound, outbound) -> {
-                    inbound.withConnection(connection -> connection.addHandler(new MSyncDecoder(CODEC)));
                     MessageHandler messageHandler = new MessageHandler(inbound, outbound);
                     DirectProcessor<Void> completion = DirectProcessor.create();
                     SCHEDULER.schedule(messageHandler::handlerMessage);
@@ -64,8 +62,8 @@ public class NettyServer {
     static class MessageHandler {
         private final NettyInbound inbound;
         private final NettyOutbound outbound;
-        private final DirectProcessor<Message> processor = DirectProcessor.create();
-        private final FluxSink<Message> fluxSink = processor.sink();
+        private final DirectProcessor<String> processor = DirectProcessor.create();
+        private final FluxSink<String> fluxSink = processor.sink();
         
         public MessageHandler(NettyInbound inbound, NettyOutbound outbound) {
             this.inbound = inbound;
@@ -74,21 +72,20 @@ public class NettyServer {
         }
         
         private void receive() {
-            this.inbound.receiveObject()
-                    .cast(Message.class)
+            this.inbound
+                    .receive()
+                    .asString()
                     .doOnNext(fluxSink::next)
                     .subscribe();
         }
         
         private void handlerMessage() {
             processor
-                    .onBackpressureBuffer()
-                    .map(message -> {
-                        log.info("receive message: [{}]", message);
+                    .onBackpressureDrop()
+                    .map(s -> {
+                        log.info("receive [{}]", s);
                         receiveCounter.increment();
-                        ByteBuf buffer = outbound.alloc().buffer();
-                        CODEC.encode(message, buffer);
-                        return outbound.send(Mono.just(buffer));
+                        return outbound.sendString(Mono.just(s));
                     })
                     .subscribe();
         }
