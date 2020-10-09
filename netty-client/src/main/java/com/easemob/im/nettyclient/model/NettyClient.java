@@ -25,15 +25,12 @@ public class NettyClient implements Client {
     }
     
     @Override
-    public Mono<User> open(String username, Message content) {
+    public Mono<User> open(String username, String content) {
         MonoProcessor<User> processor = MonoProcessor.create();
         User user = new User(username, content, processor);
         this.tcpClient
                 .metrics(true)
                 .handle((inbound, outbound) -> {
-                    inbound.withConnection(connection -> {
-                        connection.addHandler(new MSyncDecoder(codec));
-                    });
                     DirectProcessor<Void> completion = DirectProcessor.create();
                     NettyConnection connection = new NettyConnection(inbound, outbound, completion);
                     scheduler.schedule(() -> user.handleConnection(connection));

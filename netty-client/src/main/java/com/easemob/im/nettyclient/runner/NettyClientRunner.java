@@ -1,7 +1,6 @@
 package com.easemob.im.nettyclient.runner;
 
 import com.easemob.im.nettyclient.model.Client;
-import com.easemob.im.nettyclient.model.Message;
 import com.easemob.im.nettyclient.model.User;
 import com.easemob.im.nettyclient.resource.ResourceProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,6 @@ import reactor.core.publisher.Flux;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -29,12 +27,10 @@ public class NettyClientRunner implements CommandLineRunner {
     @Autowired
     private ResourceProperties resourceProperties;
     
-    private final Random random = new Random();
-    
     @Override
     public void run(String... args) throws Exception {
         log.info("run this?");
-        Message message = new Message("content");
+        String content = "content";
         List<User> list = new ArrayList<>();
         for (int i = 0; i < resourceProperties.getClientCount(); i++) {
             int finalI = i;
@@ -42,7 +38,7 @@ public class NettyClientRunner implements CommandLineRunner {
                     .delayElements(Duration.ofMillis(1))
                     .flatMap(n -> {
                         String string = UUID.randomUUID().toString();
-                        return nettyClients.get(finalI).open(string, message);
+                        return nettyClients.get(finalI).open(string, content);
                     })
                     .collectList()
                     .block();

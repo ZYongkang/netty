@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
  */
 public interface Client {
     
-    Mono<User> open(String username, Message content);
+    Mono<User> open(String username, String content);
 }

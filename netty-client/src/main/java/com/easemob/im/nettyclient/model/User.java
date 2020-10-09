@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class User {
     
     private final String name;
-    private final Message content;
+    private final String content;
     private final MonoProcessor<User> userProcessor;
     
     private NettyConnection connection;
@@ -22,7 +22,7 @@ public class User {
     public static LongAdder sendCounter = new LongAdder();
     
     
-    public User(String name, Message content, MonoProcessor<User> userProcessor) {
+    public User(String name, String content, MonoProcessor<User> userProcessor) {
         this.name = name;
         this.content = content;
         this.userProcessor = userProcessor;
@@ -47,7 +47,7 @@ public class User {
         this.connection.receive()
                 .doOnNext(s -> {
                     if (log.isDebugEnabled()) {
-                        log.debug(s.toString());
+                        log.debug(s);
                     }
                     receiveCounter.increment();
                 })

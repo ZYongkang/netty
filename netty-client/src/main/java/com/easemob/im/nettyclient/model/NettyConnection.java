@@ -1,6 +1,5 @@
 package com.easemob.im.nettyclient.model;
 
-import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
@@ -18,9 +17,7 @@ public class NettyConnection {
     private final NettyInbound inbound;
     private final NettyOutbound outbound;
     
-    private final DirectProcessor<Message> processor = DirectProcessor.create();
-    
-    private static final MessageCodec codec = new MessageCodec();
+    private final DirectProcessor<String> processor = DirectProcessor.create();
     
     public NettyConnection(NettyInbound inbound, NettyOutbound outbound, DirectProcessor<Void> closeProcessor) {
         this.inbound = inbound;
@@ -41,21 +38,19 @@ public class NettyConnection {
         return outbound;
     }
     
-    public Mono<Void> send(Message content) {
-        ByteBuf outputBuf = this.outbound.alloc().buffer();
-        codec.encode(content, outputBuf);
-        return this.outbound.send(Mono.just(outputBuf)).then();
+    public Mono<Void> send(String content) {
+        return this.outbound.sendString(Mono.just(content)).then();
     }
     
     private void sub() {
-        this.inbound.receiveObject()
-                .cast(Message.class)
+        this.inbound.receive()
+                .asString()
                 .doOnNext(processor::onNext)
                 .subscribe();
         
     }
     
-    public Flux<Message> receive() {
+    public Flux<String> receive() {
         return processor;
     }
 }
